@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐻 小熊救助中心</title>
+    <style>
+    :root {
+        --pink-1: #FFB6C1;
+        --pink-2: #FF69B4;
+        --pink-3: #FF1493;
+        --text-color: #8B008B;
+    }
+
+    body {
+        background: linear-gradient(135deg, var(--pink-1), #FFFFFF);
+        font-family: "Microsoft YaHei", sans-serif;
+        color: var(--text-color);
+        margin: 0;
+        padding: 20px;
+        min-height: 100vh;
+    }
+
+    /* 交互卡片 */
+    .interaction-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        margin: 20px auto;
+        max-width: 800px;
+        transition: transform 0.3s;
+    }
+
+    .interaction-card:hover {
+        transform: translateY(-5px);
+    }
+
+    /* 按钮样式 */
+    .magic-btn {
+        background: linear-gradient(45deg, var(--pink-2), var(--pink-3));
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 30px;
+        margin: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 16px;
+        box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .magic-btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        transition: transform 0.5s;
+    }
+
+    .magic-btn:hover::after {
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    /* 投喂区 */
+    .feed-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .magic-input {
+        width: 80%;
+        max-width: 450px;
+        padding: 15px 25px;
+        border: 2px solid var(--pink-2);
+        border-radius: 20px;
+        background: rgba(255,255,255,0.9);
+        font-size: 16px;
+        transition: all 0.3s;
+    }
+
+    .magic-input:focus {
+        outline: none;
+        border-color: var(--pink-3);
+        box-shadow: 0 0 20px rgba(255, 105, 180, 0.3);
+    }
+
+    /* 留言区 */
+    .message-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .magic-textarea {
+        width: 80%;
+        max-width: 450px;
+        height: 120px;
+        padding: 20px;
+        border: 2px solid var(--pink-2);
+        border-radius: 20px;
+        background: rgba(255,255,255,0.9);
+        font-size: 16px;
+        resize: vertical;
+    }
+
+    /* 音乐播放器 */
+    .music-player {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .album-art {
+        width: 200px;
+        height: 200px;
+        border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        overflow: hidden;
+    }
+
+    .album-art img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s;
+    }
+
+    .album-art:hover img {
+        transform: scale(1.1);
+    }
+
+    .progress {
+        width: 80%;
+        height: 8px;
+        background: rgba(255, 182, 193, 0.3);
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--pink-2), var(--pink-3));
+        border-radius: 4px;
+        width: 0%;
+        transition: width 0.1s linear;
+        position: relative;
+    }
+
+    .fill::after {
+        content: '';
+        position: absolute;
+        right: -5px;
+        top: -3px;
+        width: 14px;
+        height: 14px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    /* 列表容器 */
+    .list-container {
+        width: 90%;
+        margin-top: 30px;
+        background: rgba(255,255,255,0.9);
+        border-radius: 20px;
+        padding: 20px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .list-item {
+        padding: 20px;
+        margin: 15px 0;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(255, 182, 193, 0.2);
+        animation: slideIn 0.5s ease-out;
+    }
+
+    /* 动画效果 */
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes float {
+        0% { transform: translateY(0); opacity: 1; }
+        100% { transform: translateY(-100px); opacity: 0; }
+    }
+
+    /* 爱心计数器 */
+    #heart-counter {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        font-size: 24px;
+        color: #FF0000;
+        animation: heartbeat 1.5s infinite;
+    }
+
+    @keyframes heartbeat {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+    </style>
+</head>
+<body>
+    <div id="heart-counter">❤️0</div>
+    
+    <header class="interaction-card">
+        <h1 style="text-align:center;">🐻 小熊救助中心 🐻</h1>
+        <nav style="text-align:center;">
+            <button class="magic-btn" onclick="showSection('home')">🏡 首页</button>
+            <button class="magic-btn" onclick="showSection('resume')">📖 简历</button>
+            <button class="magic-btn" onclick="showSection('feed')">🍰 投喂小熊</button>
+            <button class="magic-btn" onclick="showSection('message')">💌 留言</button>
+            <button class="magic-btn" onclick="showSection('music')">🎵 音乐</button>
+        </nav>
+    </header>
+
+    <!-- 首页 -->
+    <section id="home" class="interaction-card">
+        <div style="text-align:center;">
+            <img src="bear.png" id="game-bear" onclick="createHeart()" 
+                 style="width:200px; cursor:pointer; transition:transform 0.3s;"
+                 onmouseover="this.style.transform='scale(1.05)'" 
+                 onmouseout="this.style.transform='scale(1)'">
+            <h2>✨ 欢迎来到小熊的世界 ✨</h2>
+            <p>点击小熊收集爱心吧~</p>
+        </div>
+    </section>
+
+    <!-- 简历 -->
+    <section id="resume" class="interaction-card" style="display:none;">
+<div class="resume-section">
+    <h2 style="color:var(--pink-3);border-bottom:2px solid var(--pink-2);">🐾 基本信息</h2>
+    <div style="display:flex;align-items:center;margin:15px 0;">
+        <img src="avatar.png" style="width:100px;border-radius:50%;margin-right:20px;">
+        <div>
+            <p>🎀 姓名：小熊</p>
+            <p>🎂 生日：12月29日</p>
+            <p>📍 籍贯：狗熊岭</p>
+            <p>📱 电话：6418857</p>
+            <p>📧 邮箱：gouxiongling@qq.com</p>
+			<p>❤️ 生存技能：牛肉料理十级品鉴师｜桃子消灭专家</p>
+            <p>❤️ 精神食粮：🎬电影马拉松选手｜📖书海冲浪手｜🎧深夜emo音乐疗法师｜🏃马拉松预备役｜🎥光影收割机｜🚴自行车永动装置</p>
+        </div>
+    </div>
+
+    <h2 style="color:var(--pink-3);border-bottom:2px solid var(--pink-2);">🎓 教育背景</h2>
+    <div class="timeline">
+        <div class="timeline-item">
+            <div class="timeline-dot" style="background:var(--pink-2);"></div>
+            <div class="timeline-content">
+                <h3>🏫 狗熊岭大学</h3>
+                <p>📆 2021.09 - 2025.07（渡劫中）</p>
+                <p>🎯 光影魔术师</p>
+                <p>🔧 核心技能：百万素材驯兽师 | 五毛特效炼丹师 | 新媒体牧场主 | 镜头语言翻译官 | 灵魂拷问专家 | 像素美容院院长 | 声波整形师 | 键盘侠克星 | 融合新闻学</p>
+                <p>📸 飞升作品：《陶之夭夭——我与泥巴的72小时爱情故事》</p>
+            </div>
+        </div>
+    </div>
+
+    <h2 style="color:var(--pink-3);border-bottom:2px solid var(--pink-2);">🏆 荣誉成就</h2>
+    <ul class="awards-list">
+        <li>🏅 墨池龙卷风幸存者</li>
+        <li>🏆 知识兑奖券</li>
+        <li>🏅 商业计划书选美季军</li>
+        <li>🏅 甲方需求翻译大赛冠军</li>
+        <li>🏅 谍影重重微电影新人奖</li>
+        <li>🏅 廉政文化传播大使</li>
+        <li>🏅 防艾宣传折纸艺术家</li>
+        <li>🏅 全国大学生广告艺术大赛国家级优秀奖 (2023)</li>
+        <li>🏅 演讲界德云社编外弟子</li>
+        <li>🏅 校园蹦迪积极分子</li>
+        <li>🏅 国家级脑洞开发纪念奖</li>
+        <li>🏅 心理小剧场奥斯卡</li>
+        <li>🏅 红色主题PS争霸赛探花</li>
+        <li>🚗 秋名山车神预备役</li>
+        <li>📖 普通话二甲认证相声演员</li>
+    </ul>
+
+    <h2 style="color:var(--pink-3);border-bottom:2px solid var(--pink-2);">💼 江湖历练</h2>
+    <div class="experience-card">
+        <h3>🏦 地产界福尔摩斯</h3>
+        <p>🔍 客户行为侧写师：从存款余额推测咖啡口味の玄学实践</p>
+        <p>🎯 精准投喂专家：成功让客户主动交出联系方式</p>    
+    </div>
+    <div class="experience-card">
+        <h3>🎥 网文推广大使</h3>
+        <p>✍️ 套路文学工程师：研发"30秒必反转"剧本模板</p>
+        <p>🎬 经费消灭者：用五块钱拍出五百万既视感</p>
+    </div>
+    <div class="experience-card">
+        <h3>🏦 银行届知心姐姐</h3>
+        <p>💸 反诈宣传段子手：让大爷大妈笑着捂紧钱包</p>
+        <p>📱 朋友圈理财鸡汤文高产作家：让年轻一族轻松掌握财富密码</p>
+    </div>
+
+    <h2 style="color:var(--pink-3);border-bottom:2px solid var(--pink-2);">📊 观察报告</h2>
+    <div class="experience-card">
+        <h3>学术卷王の自白:</h3>
+        <p>🏃 自习室幽灵：常年出没于教学楼的神秘生物</p>
+        <p>🎯 比赛收集癖患者：荣誉证书集邮爱好者</p>
+    </div>
+    <div class="experience-card">
+        <h3>思想觉悟观察:</h3>
+        <p>📰 新闻联播十级学者：能全文背诵重要讲话的金句小能手</p>
+        <p>🌱 积极分子の自我修：永远在写思想汇报的路上</p>
+    </div>
+    <div class="experience-card">
+        <h3>职场生存指南:</h3>
+        <p>⏰ 时间管理大师：DDL驯兽师｜多线程操作狂魔</p>
+        <p>🌈 反emo战士：用笑声震碎玻璃心的乐观派代表</p>
+    </div>
+</div>
+    </section>
+
+    <!-- 投喂区 -->
+    <section id="feed" class="interaction-card" style="display:none;">
+        <h2 style="text-align:center;">🍰 甜品投喂记录</h2>
+        <div class="feed-container">
+            <input type="number" class="magic-input" id="amount" placeholder="🍬 请输入糖果数量">
+            <input type="text" class="magic-input" id="donor" placeholder="🎀 你的甜蜜昵称">
+            <button class="magic-btn" onclick="addDonation()">发射甜蜜能量 💘</button>
+        </div>
+        <div class="list-container" id="feed-list-container"></div>
+    </section>
+
+    <!-- 留言区 -->
+    <section id="message" class="interaction-card" style="display:none;">
+        <h2 style="text-align:center;">💌 工作邀约留言板</h2>
+        <div class="message-container">
+            <textarea class="magic-textarea" id="jobContent" placeholder="✨ 请输入您的工作邀约内容..."></textarea>
+            <input type="text" class="magic-input" id="contact" placeholder="📧 联系方式（电话/邮箱）">
+            <button class="magic-btn" onclick="addMessage()">发送星空邀约 ✨</button>
+        </div>
+        <div class="list-container" id="message-list-container"></div>
+    </section>
+
+    <!-- 音乐播放器 -->
+    <section id="music" class="interaction-card" style="display:none;">
+        <div class="music-player">
+            <div class="album-art">
+                <img src="1.jpg" id="album-cover">
+            </div>
+            <h3 id="now-playing">🎵 当前播放：拥抱</h3>
+            <audio id="music-audio" controls>
+                <source src="1.mp3" type="audio/mpeg">
+            </audio>
+            <div class="controls">
+                <button class="magic-btn" onclick="changeTrack(-1)">⏮ 上一曲</button>
+                <button class="magic-btn" onclick="playPause(0)">▶️ 播放/暂停</button>
+                <button class="magic-btn" onclick="changeTrack(1)">⏭ 下一曲</button>
+            </div>
+            <div class="progress" onclick="seek(event)">
+                <div class="fill" id="progress-fill"></div>
+            </div>
+            <div class="list-container" id="playlist"></div>
+        </div>
+    </section>
+
+    <script>
+    // 全局状态
+    let heartCount = 0;
+    let currentTrack = 0;
+    const playlist = [
+        { 
+            title: "拥抱", 
+            file: "1.mp3",
+            duration: "04:12",
+            cover: "1.jpg"
+        },
+        {
+            title: "步步",
+            file: "2.mp3",
+            duration: "04:33",
+            cover: "2.jpg"
+        },
+        {
+            title: "红",
+            file: "3.mp3",
+            duration: "03:52",
+            cover: "3.jpg"
+        },
+		{ 
+            title: "下一次爱情来的时候", 
+            file: "4.mp3",
+            duration: "04:18",
+            cover: "4.jpg"
+        },
+        {
+            title: "曾经是情侣",
+            file: "5.mp3",
+            duration: "06:43",
+            cover: "5.jpg"
+        },
+        {
+            title: "Without You",
+            file: "6.mp3",
+            duration: "02:17",
+            cover: "6.jpg"
+        },{ 
+            title: "Rampampam", 
+            file: "7.mp3",
+            duration: "03:20",
+            cover: "7.jpg"
+        },
+        {
+            title: "Clean Break",
+            file: "8.mp3",
+            duration: "02:54",
+            cover: "8.jpg"
+        },
+        {
+            title: "Just A Kiss",
+            file: "9.mp3",
+            duration: "03:38",
+            cover: "9.jpg"
+        },
+        {
+            title: "画心",
+            file: "10.mp3",
+            duration: "05:24",
+            cover: "10.jpg"
+        },
+        {
+            title: "保留",
+            file: "11.mp3",
+            duration: "04:30",
+            cover: "11.jpg"
+        },       
+		{
+            title: "思念是一把刀 ",
+            file: " 12.mp3",
+            duration: "05:34",
+            cover: "12.jpg"
+        },
+        {
+            title: "Stan ",
+            file: "13.mp3",
+            duration: "06:44",
+            cover: "13.jpg"
+        },       
+        {
+            title: "一人行 ",
+            file: "14.mp3",
+            duration: "03:18",
+            cover: " 14.jpg"
+        },
+        {
+            title: " Heather",
+            file: " 15.mp3",
+            duration: "02:05",
+            cover: "15.jpg"
+        },       
+        {
+            title: "呼吸决定 ",
+            file: "16.mp3",
+            duration: "03:52",
+            cover: " 16.jpg"
+        },
+        {
+            title: " 不喜欢下雨天",
+            file: " 17.mp3",
+            duration: "02:50",
+            cover: "17.jpg"
+        },       
+        {
+            title: "暴风雨 ",
+            file: "18.mp3",
+            duration: "02:13",
+            cover: " 18.jpg"
+        },
+        {
+            title: " 向云端",
+            file: " 19.mp3",
+            duration: "04:12",
+            cover: "19.jpg"
+        },
+        {
+            title: " 山楂树の恋",
+            file: " 20.mp3",
+            duration: "03:18",
+            cover: "20.jpg"
+        },
+    ];
+    const audioElement = document.getElementById('music-audio');
+
+    // 初始化
+    function init() {
+        loadRecords();
+        renderPlaylist();
+        audioElement.addEventListener('timeupdate', updateProgress);
+        audioElement.addEventListener('ended', () => changeTrack(1));
+        setInterval(updateTitle, 1000);
+    }
+
+    // 动态标题
+    function updateTitle() {
+        document.title = document.title.includes('♪') 
+            ? '🐻 小熊救助中心' 
+            : '🐻 小熊救助中心 ♪';
+    }
+
+    // 爱心点击特效
+    function createHeart() {
+        heartCount++;
+        document.getElementById('heart-counter').textContent = `❤️${heartCount}`;
+        
+        const heart = document.createElement('div');
+        heart.innerHTML = '❤️';
+        heart.style.cssText = `
+            position: fixed;
+            font-size: 30px;
+            animation: float 2s ease-out;
+            left: ${Math.random() * 90 + 5}%;
+            top: ${Math.random() * 90 + 5}%;
+            z-index: 999;
+            pointer-events: none;
+        `;
+        document.body.appendChild(heart);
+        new Audio('heart.mp3').play();
+        setTimeout(() => heart.remove(), 2000);
+    }
+
+    // 数据存储
+    function saveData(key, data) {
+        localStorage.setItem(key, JSON.stringify(data));
+    }
+
+    // 投喂功能
+    function addDonation() {
+        const amount = document.getElementById('amount').value;
+        const donor = document.getElementById('donor').value || '匿名爱心人士';
+        
+        if (!amount || isNaN(amount)) {
+            showToast('🍭 请输入有效的糖果数量！');
+            return;
+        }
+        
+        const donation = {
+            amount,
+            donor,
+            date: new Date().toLocaleString()
+        };
+
+        const donations = JSON.parse(localStorage.getItem('donations') || '[]');
+        donations.unshift(donation);
+        saveData('donations', donations);
+        
+        renderDonations();
+        document.getElementById('amount').value = '';
+        document.getElementById('donor').value = '';
+        showToast('🍬 甜蜜投喂成功！小熊感谢你~');
+    }
+
+    // 留言功能
+    function addMessage() {
+        const content = document.getElementById('jobContent').value;
+        const contact = document.getElementById('contact').value || '未留联系方式';
+        
+        if (!content.trim()) {
+            showToast('💌 请填写邀约内容哦~');
+            return;
+        }
+        
+        const message = {
+            content,
+            contact,
+            date: new Date().toLocaleString()
+        };
+
+        const messages = JSON.parse(localStorage.getItem('messages') || '[]');
+        messages.unshift(message);
+        saveData('messages', messages);
+        
+        renderMessages();
+        document.getElementById('jobContent').value = '';
+        document.getElementById('contact').value = '';
+        showToast('✨ 邀约已发送！小熊会尽快回复~');
+    }
+
+    // 音乐控制
+    function playPause() {
+        audioElement‌:ml-search[audioElement.paused ? 'play' : 'pause'];
+    }
+
+    function changeTrack(direction) {
+        currentTrack = (currentTrack + direction + playlist.length) % playlist.length;
+        updateCover();
+        audioElement.src = playlist[currentTrack].file;
+        audioElement.play();
+        highlightTrack();
+    }
+
+    function updateCover() {
+        document.getElementById('album-cover').src = playlist[currentTrack].cover;
+        document.getElementById('now-playing').textContent = 
+            `🎵 当前播放：${playlist[currentTrack].title}`;
+    }
+
+    // 进度条控制
+    function updateProgress() {
+        const progress = (audioElement.currentTime / audioElement.duration) * 100;
+        document.getElementById('progress-fill').style.width = `${progress}%`;
+    }
+
+    function seek(event) {
+        const rect = event.target.getBoundingClientRect();
+        const pos = (event.clientX - rect.left) / rect.width;
+        audioElement.currentTime = pos * audioElement.duration;
+    }
+
+    // 播放列表
+    function renderPlaylist() {
+        const list = document.getElementById('playlist');
+        list.innerHTML = playlist.map((track, index) => `
+            <div class="list-item ${index === currentTrack ? 'playing' : ''}" 
+                 onclick="playTrack(${index})">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <img src="${track.cover}" style="width:50px; height:50px; border-radius:8px;">
+                    <div>
+                        <div>${track.title}</div>
+                        <small>${track.duration}</small>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function playTrack(index) {
+        currentTrack = index;
+        updateCover();
+        audioElement.src = playlist[index].file;
+        audioElement.play();
+        highlightTrack();
+    }
+
+    function highlightTrack() {
+        document.querySelectorAll('#playlist .list-item').forEach((item, index) => {
+            item.classList.toggle('playing', index === currentTrack);
+        });
+    }
+
+    // 加载历史记录
+    function loadRecords() {
+        renderDonations();
+        renderMessages();
+    }
+
+    function renderDonations() {
+        const donations = JSON.parse(localStorage.getItem('donations') || '[]');
+        const container = document.getElementById('feed-list-container');
+        container.innerHTML = donations.map(item => `
+            <div class="list-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div>🍬 ${item.amount}颗糖果</div>
+                        <small>💌 来自：${item.donor}</small>
+                    </div>
+                    <small>${item.date}</small>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderMessages() {
+        const messages = JSON.parse(localStorage.getItem('messages') || '[]');
+        const container = document.getElementById('message-list-container');
+        container.innerHTML = messages.map(item => `
+            <div class="list-item">
+                <div>
+                    <div style="margin-bottom: 10px;">📮 ${item.content}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <small>📧 ${item.contact}</small>
+                        <small>${item.date}</small>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Toast提示
+    function showToast(message) {
+        const toast = document.createElement('div');
+        toast.textContent = message;
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 30px;
+            animation: slideIn 0.5s;
+            z-index: 999;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    }
+
+    // 页面切换
+    function showSection(sectionId) {
+        document.querySelectorAll('section').forEach(section => {
+            section.style.display = 'none';
+        });
+        document.getElementById(sectionId).style.display = 'block';
+    }
+
+    // 启动初始化
+    window.onload = init;
+    </script>
+</body>
+</html>
